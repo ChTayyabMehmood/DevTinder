@@ -41,4 +41,29 @@ BE -> Node JS
 these two communicate with each other through API ; 
 
 
+DevTinder : 
+Feature 
+1. create a account 
+2. login 
+3. update your profile 
+4. feed page - explore 
+5. send connection request
+6. see our matches 
+7. see request we have sent sent / received 
+
+
+
+
+
+Before writing SDE is do the lld & hlld 
+
+lld: 
+first important thing : 
+#DB design 
+# 
+
+
+
+
+epsiode -03: 
 
