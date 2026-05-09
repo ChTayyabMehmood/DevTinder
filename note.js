@@ -1,4 +1,4 @@
-what is monolith vs microServices
+/** what is monolith vs microServices
 
 In monolith: all backend + db connect forntend +auth+emails+analytics are in on project 
 
@@ -69,3 +69,21 @@ first important thing :
 
 epsiode -03: 
 
+
+
+Episode-05 | Middlewares & Error Handlers
+
+if i didnot send back a response, the request is hangout; 
+
+one route have multiple route handle
+app.use("/user",()=>{},)
+**/
+
+app.use('/home',
+(req,res)=>{
+res.send("first handler")
+},
+(req,res)=>{
+res.send("first handler")
+
+})
