@@ -1,24 +1,33 @@
-require("dotenv").config();
 const express = require("express");
 const connectDB = require("./config/database.js");
 const app = express();
 
 const User = require("./model/user.js");
+//it is middle vere mean it automatically convert the json into js object
 app.use(express.json());
 
-app.post("/signup", async (req, res) => {
-  const userObj = {
-    firstName: "ali",
-    lastName: "khan",
-    password: "kingasad",
-    age: 19,
-    gender: "Male",
-    email: "Pakistan@gmail.com",
-    superNode: "father",
-  };
+// add data prebuild
+// app.post("/signup", async (req, res) => {
+//   const userObj = {
+//     firstName: "ali",
+//     lastName: "khan",
+//     password: "kingasad",
+//     age: 19,
+//     gender: "Male",
+//     email: "Pakistan@gmail.com",
+//     superNode: "father",
+//   };
 
-  //create a new instance of user model
-  const user = new User(userObj);
+//   //create a new instance of user model
+
+//   const user = new User(userObj);
+
+// });
+
+// now how we can sent signup in dynmaic
+
+app.post("/signup", async (req, res) => {
+  const user = new User(req.body);
 
   try {
     await user.save();
