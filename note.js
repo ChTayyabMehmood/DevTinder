@@ -6,7 +6,7 @@ MicroServices: Microservices are an architectural style that structures an appli
 
 there small services own backend type : 
 auth is : own backend, 
-forntend is own services; 
+forntend is own services
 
 Developement SPeed: microServices is faster than Monolith 
 code Repo: multiple  vs only single 
@@ -79,16 +79,12 @@ one route have multiple route handle
 app.use("/user",()=>{},)
 **/
 
-app.use('/home',
-(req,res)=>{
-res.send("first handler")
-},
-(req,res)=>{
-res.send("first handler")
-
-})
-
-
-here is tayyab
-
-//testing commit 
+app.use(
+  "/home",
+  (req, res) => {
+    res.send("first handler");
+  },
+  (req, res) => {
+    res.send("second handler");
+  },
+);
