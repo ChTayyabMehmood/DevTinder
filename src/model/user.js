@@ -1,30 +1,58 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+const validator = require("validator");
 
-const userSchema = new mongoose.Schema({ 
+const userSchema = new mongoose.Schema(
+  {
     firstName: {
-        type: String,
-        },
+      type: String,
+      required: true,
+      maxLenght: 50,
+    },
     lastName: {
-        type: String,
-         },
+      type: String,
+    },
     password: {
-        type: String,
-         },
+      type: String,
+    },
     age: {
-        type: Number,
-         },
+      type: Number,
+      min: 18,
+    },
     gender: {
-        type: String,
-        required: true },
+      type: String,
+      required: true,
+      validate(value) {
+        if (!["male", "female", "other"].includes(value)) {
+          throw new Error("Gender Data is not valid");
+        }
+      },
+    },
     email: {
-        type: String,
-        required: true },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
-});
+      type: String,
+      required: true,
+      unique: true,
+      validate(value) {
+        if (!validator.isEmail(email)) throw new Error("Email is not valid");
+      },
+    },
+    photoUrl: {
+      type: String,
+      default:
+        "https://cdn.vectorstock.com/i/500p/98/18/gray-man-placeholder-portrait-vector-23519818.jpg",
+    },
+    about: {
+      type: String,
+      default: "This is default User!",
+    },
+    skills: {
+      type: [String],
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
 
 const User = mongoose.model("users", userSchema);
 
-module.exports = User;  
+module.exports = User;
