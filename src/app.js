@@ -5,6 +5,7 @@ const app = express();
 const { validateSignUpData } = require("./utils/validation.js");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
+const { userAuth } = require("./middleware/auth.js");
 
 const User = require("./model/user.js");
 //it is middle vere mean it automatically convert the json into js object
@@ -43,11 +44,10 @@ app.post("/login", async (req, res) => {
       throw new Error("Invalid Credentail");
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
+    const isPasswordValid = await user.validatePassword(password);
     if (isPasswordValid) {
-      //genretae the token
-      const token = await jwt.sign({ _id: user._id }, "shhhhh");
+      //generate the token
+      const token = await user.getJWT();
       //send the token as user's cookie
       res.cookie("token", token);
 
@@ -60,18 +60,19 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/profile", async (req, res) => {
+app.get("/sendConnectionRequest", userAuth, async (req, res) => {
   try {
-    const cookies = req.cookies;
-    const { token } = cookies;
+    const user = req.user;
 
-    if (!token) throw new Error("Login Again");
+    res.send(user.firstName + " send the connection request");
+  } catch (err) {
+    res.status(400).send("something went wrong: " + err);
+  }
+});
 
-    const decodeMessage = await jwt.verify(token, "shhhhh");
-    const { _id } = decodeMessage;
-    const user = await User.findById(_id);
-
-    res.send(user);
+app.get("/profile", userAuth, async (req, res) => {
+  try {
+    res.send(req.user);
   } catch (err) {
     res.status(400).send("something went wrong: " + err);
   }
