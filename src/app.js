@@ -1,21 +1,79 @@
 const express = require("express");
 const connectDB = require("./config/database.js");
+const bcrypt = require("bcryptjs");
 const app = express();
+const { validateSignUpData } = require("./utils/validation.js");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 
 const User = require("./model/user.js");
 //it is middle vere mean it automatically convert the json into js object
 app.use(express.json());
+app.use(cookieParser());
 
 // now how we can sent signup in dynmaic
 
 app.post("/signup", async (req, res) => {
-  const user = new User(req.body);
-
   try {
+    validateSignUpData(req);
+    const { firstName, lastName, email, password, gender } = req.body;
+
+    const hashpassword = await bcrypt.hash(password, 2);
+    const user = new User({
+      firstName,
+      lastName,
+      email,
+      password: hashpassword,
+      gender,
+    });
+
+    console.log(hashpassword);
     await user.save();
     res.send("User created successfully");
   } catch (err) {
     res.status(400).send("error saving user" + err);
+  }
+});
+
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      throw new Error("Invalid Credentail");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (isPasswordValid) {
+      //genretae the token
+      const token = await jwt.sign({ _id: user._id }, "shhhhh");
+      //send the token as user's cookie
+      res.cookie("token", token);
+
+      res.send("user login sucessfully");
+    } else {
+      throw new Error("Invalid Credentail");
+    }
+  } catch (err) {
+    res.status(400).send("something went wrong: " + err);
+  }
+});
+
+app.get("/profile", async (req, res) => {
+  try {
+    const cookies = req.cookies;
+    const { token } = cookies;
+
+    if (!token) throw new Error("Login Again");
+
+    const decodeMessage = await jwt.verify(token, "shhhhh");
+    const { _id } = decodeMessage;
+    const user = await User.findById(_id);
+
+    res.send(user);
+  } catch (err) {
+    res.status(400).send("something went wrong: " + err);
   }
 });
 

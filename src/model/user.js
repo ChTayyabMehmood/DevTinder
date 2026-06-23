@@ -31,9 +31,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-      validate(value) {
-        if (!validator.isEmail(email)) throw new Error("Email is not valid");
-      },
     },
     photoUrl: {
       type: String,
