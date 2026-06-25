@@ -1,187 +1,20 @@
 const express = require("express");
 const connectDB = require("./config/database.js");
-const bcrypt = require("bcryptjs");
 const app = express();
-const { validateSignUpData } = require("./utils/validation.js");
-const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
-const { userAuth } = require("./middleware/auth.js");
-
 const User = require("./model/user.js");
-//it is middle vere mean it automatically convert the json into js object
+
 app.use(express.json());
 app.use(cookieParser());
 
-// now how we can sent signup in dynmaic
+const authRouter = require("./routes/auth.js");
+const profileRouter = require("./routes/profile.js");
+const requestRouter = require("./routes/requests.js");
 
-app.post("/signup", async (req, res) => {
-  try {
-    validateSignUpData(req);
-    const { firstName, lastName, email, password, gender } = req.body;
+app.use("/", authRouter);
+app.use("/", profileRouter);
+app.use("/", requestRouter);
 
-    const hashpassword = await bcrypt.hash(password, 2);
-    const user = new User({
-      firstName,
-      lastName,
-      email,
-      password: hashpassword,
-      gender,
-    });
-
-    console.log(hashpassword);
-    await user.save();
-    res.send("User created successfully");
-  } catch (err) {
-    res.status(400).send("error saving user" + err);
-  }
-});
-
-app.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email: email });
-    if (!user) {
-      throw new Error("Invalid Credentail");
-    }
-
-    const isPasswordValid = await user.validatePassword(password);
-    if (isPasswordValid) {
-      //generate the token
-      const token = await user.getJWT();
-      //send the token as user's cookie
-      res.cookie("token", token);
-
-      res.send("user login sucessfully");
-    } else {
-      throw new Error("Invalid Credentail");
-    }
-  } catch (err) {
-    res.status(400).send("something went wrong: " + err);
-  }
-});
-
-app.get("/sendConnectionRequest", userAuth, async (req, res) => {
-  try {
-    const user = req.user;
-
-    res.send(user.firstName + " send the connection request");
-  } catch (err) {
-    res.status(400).send("something went wrong: " + err);
-  }
-});
-
-app.get("/profile", userAuth, async (req, res) => {
-  try {
-    res.send(req.user);
-  } catch (err) {
-    res.status(400).send("something went wrong: " + err);
-  }
-});
-
-//get user by email:
-app.get("/User", async (req, res) => {
-  const UserEmail = req.body.email;
-  try {
-    const user = await User.findOne({ email: UserEmail });
-    if (user.length == 0) {
-      return res.status(404).send("user not found");
-    }
-    return res.send(user);
-  } catch (err) {
-    return res.status(400).send("something went wrong");
-  }
-});
-
-// feed API -> GET /feed get all user of database;
-app.get("/feed", async (req, res) => {
-  try {
-    const user = await User.find({});
-    res.send(user);
-  } catch (err) {
-    res.status.send("something went wrong");
-  }
-});
-
-// delete api by email
-
-app.delete("/user", async (req, res) => {
-  const UserEmail = req.body.email;
-  const user = await User.findOneAndDelete({ email: UserEmail });
-  if (!user) {
-    return res.status(404).send("User not found");
-  }
-
-  return res.send("User deleted successfully");
-});
-
-// delete api -> user by ID
-app.delete("/id", async (req, res) => {
-  const userID = req.body.userID;
-
-  try {
-    const user = await User.findByIdAndDelete(userID);
-    if (!user) {
-      return res.status(404).send("user not founded");
-    }
-    return res.send("user delete successfully");
-  } catch (err) {
-    res.send("something went wrong");
-  }
-});
-
-//update the data of user
-app.patch("/user/:userID", async (req, res) => {
-  const userID = req.params?.userID;
-  const data = req.body;
-
-  try {
-    const ALLOWED_Update = [
-      "userID",
-      "photoUrl",
-      "age",
-      "password",
-      "about",
-      "skills",
-    ];
-    const isAllowUpdate = Object.keys(data).every((k) =>
-      ALLOWED_Update.includes(k),
-    );
-
-    if (!isAllowUpdate) {
-      throw new Error("update is not allowed");
-    }
-
-    const user = await User.findByIdAndUpdate(userID, data, {
-      returnDocument: "before",
-    });
-
-    if (!user) {
-      return res.status(404).send("user not founded");
-    }
-    return res.send("user update successfully");
-  } catch (err) {
-    res.status(400).send(err.message);
-  }
-});
-
-//update user by email id
-app.patch("/userbyEmail", async (req, res) => {
-  const userEmail = req.body.userEmail;
-  const data = req.body;
-
-  try {
-    const user = await User.findOneAndUpdate({ email: userEmail }, data);
-    if (!user) {
-      return res.status(404).send("user not founded");
-    }
-    console.log(user);
-    return res.send("user update successfully");
-  } catch (err) {
-    res.send("something went wrong");
-  }
-});
-
-//connect to db and create server
 connectDB()
   .then(() => {
     console.log("database is connect sucessfully");
