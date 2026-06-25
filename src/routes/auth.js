@@ -3,6 +3,7 @@ const { validateSignUpData } = require("../utils/validation");
 const bcrypt = require("bcryptjs");
 const User = require("../model/user.js");
 const jwt = require("jsonwebtoken");
+const { userAuth } = require("../middleware/auth.js");
 
 const authRouter = express.Router();
 
@@ -23,7 +24,7 @@ authRouter.post("/signup", async (req, res) => {
     await user.save();
     res.send("User created successfully");
   } catch (err) {
-    res.status(400).send("error saving user" + err);
+    res.status(400).send("ERROR: " + err);
   }
 });
 
@@ -47,8 +48,16 @@ authRouter.post("/login", async (req, res) => {
       throw new Error("Invalid Credentail");
     }
   } catch (err) {
-    res.status(400).send("something went wrong: " + err);
+    res.status(400).send("ERROR: " + err);
   }
+});
+
+authRouter.post("/logout", async (req, res) => {
+  res.cookie("token", null, {
+    expires: new Date(Date.now()),
+  });
+
+  res.send("User Logout Successfullt");
 });
 
 module.exports = authRouter;
