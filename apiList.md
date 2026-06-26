@@ -19,6 +19,9 @@
 -POST /request/review/accepted/:userID
 -POST /request/review/rejected/:userID
 
+how we store the connection request:
+i will make another user:
+
 ## userRouter
 
 -GET /user/connections
