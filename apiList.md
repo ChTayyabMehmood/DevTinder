@@ -28,4 +28,6 @@ i will make another user:
 -GET /user/requests/received
 -GET /feed -Gets you the profiles of other users on plateform
 
+-> only show those whoese i never send the request , accept or reject or insteret or ignore never see him and also the i also donot show my own feed
+
 Status: interested , ignore, accepted, reject
